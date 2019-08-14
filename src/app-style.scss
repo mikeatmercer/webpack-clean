@@ -1,0 +1,22 @@
+.gSearchApp {
+    max-width: 520px;
+    * {
+        box-sizing: border-box;
+    }
+}
+.searchResults {
+    position:relative; 
+}
+.resultItem {
+    margin-top: 24px;
+}
+.resultTitle {
+    display:block;
+    font-size: 18px;
+    margin-bottom: 8px;
+    line-height: (14/18);
+}
+.resultDescription {
+    font-size: 14px;
+    line-height: 1.45; 
+}

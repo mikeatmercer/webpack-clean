@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const webpack = require("webpack");
 
 const ENV = process.env.NODE_ENV || 'development';
 
@@ -14,11 +15,15 @@ module.exports = {
   },
   mode: ENV,
   plugins: [
+    new webpack.HotModuleReplacementPlugin(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
         template:"./src/index.ejs"
     })
   ],
+  externals: {
+    jquery: 'jQuery'
+  },
   module: {
       rules: [
           {
@@ -55,7 +60,12 @@ module.exports = {
   },
   devServer: {
       contentBase: "./src",
-      watchContentBase: true
+      watchContentBase: true,
+      host: "0.0.0.0",
+      publicPath: "http://10.91.37.19:8080/",
+      sockHost: "10.91.37.19",
+      sockPort: "8080",
+      disableHostCheck: true
   },
-  devtool: ENV==='production' ? 'source-map' : 'cheap-module-eval-source-map'
+  devtool: ENV==='production' ? 'source-map' : 'eval'
 };

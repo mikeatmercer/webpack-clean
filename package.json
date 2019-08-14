@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "cross-env NODE_ENV=production webpack --optimize-minimize --hide-modules",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --progress --open",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server ",
     "analyze": " source-map-explorer ./dist/bundle.js ./dist/bundle.js.map"
   },
   "author": "mike moore <mike.moore1@mercer.com",
@@ -16,7 +16,6 @@
     "@babel/preset-stage-1": "^7.0.0",
     "babel-loader": "^8.0.6",
     "babel-plugin-jsx-pragmatic": "^1.0.2",
-    "babel-plugin-transform-object-assign": "^6.22.0",
     "babel-plugin-transform-react-constant-elements": "^6.23.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
@@ -33,8 +32,9 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
-    "@babel/plugin-transform-object-assign": "^7.2.0",
     "core-js": "^2.6.9",
+    "es6-object-assign": "^1.1.0",
+    "linkstate": "^1.1.1",
     "preact": "^8.4.2",
     "preact-compat": "^3.19.0",
     "preact-habitat": "^3.2.2",

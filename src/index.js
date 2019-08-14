@@ -1,4 +1,4 @@
-import "core-js/modules/es6.object.assign";
+require('es6-object-assign').polyfill();
 
 import "./style.css";
 //import modTest from "./module";
@@ -14,6 +14,8 @@ document.body.appendChild(thing);
 
 modTest(); 
 */
+
+
 
 let _habitat = habitat(App);
 

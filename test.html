@@ -1,0 +1,372 @@
+<style>
+    #g-search-app {
+        max-width: 520px; 
+    }
+    #g-search-app * {
+        box-sizing: border-box;
+    }
+    #g-search-app .search-input{
+        margin-top: 12px; 
+        display:flex;
+    
+        background: #fafafa;
+        box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 4px 0 rgba(0,0,0,0.1), 0 0 6px 0 rgba(0,0,0,0.06);
+        border-radius: 2px;
+        overflow:hidden; 
+        transition: box-shadow .25s;
+        
+    }
+    #g-search-app .search-input.focused {
+        /*box-shadow: 0 0 4px 0 rgb(0,0,0,.02), 0 1px 12px 0 rgba(0,0,0,.1), 0 4px 5px 0 rgba(0,0,0,.12); */
+        box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 12px 0 rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,.12);
+    }
+    #g-search-app .search-field {
+        border: 0;
+        padding: 12px;
+        height: 42px;
+        font-size: 16px;
+        background: none; 
+        outline: none; 
+        flex: 1; 
+    }
+    #g-search-app .search-field:-ms-input-placeholder {
+       
+        color:rgba(0,0,0,.6);
+    } 
+    #g-search-app .search-field::-ms-clear {
+        display:none; 
+    }
+    #g-search-app .search-input button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        position:relative;
+        width: 42px;
+        height: 42px; 
+        cursor: pointer; 
+    }
+    #g-search-app .search-input button > svg {
+        display:block;
+        width: 24px;
+        height: 24px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+    }
+    #g-search-app .search-input button.search-clear > svg {
+        width: 18px;
+        height: 18px;
+    }
+    #g-search-app .search-input button.search-submit {
+        background:#005c96; 
+        fill: white; 
+    }
+    #g-search-app .search-input button.search-clear {
+        display:none; 
+    }
+    #g-search-app .result-item {
+        margin-top: 24px;
+    }
+    #g-search-app .result-item-title {
+        display:block;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    #g-search-app .result-item-description {
+        font-size: 14px;
+        line-height: 1.45; 
+    }
+    #g-search-app .search-results {
+        position: relative;
+    }
+    #g-search-app .loader-bar {
+        position: relative;
+        width: 100%;
+        height: 5px;
+    }
+    #g-search-app .loader-bar:after {
+        display: block;
+        content:'';
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: #08abc8;
+        animation: loadingBar 1s infinite linear;
+        transform-origin: left center;
+    }
+    @keyframes loadingBar {
+      0% {
+        transform-origin: left center;
+        transform: scaleX(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scaleX(1);
+        transform-origin:left center;
+        opacity: 1;
+      }
+      50.01% {
+        transform-origin: right center;
+      }
+      100% {
+        opacity: 0;
+        transform: scaleX(0);
+        transform-origin:right center;
+      }
+    }
+    </style>
+        
+    
+    <div id="g-search-app" style="visibility: hidden;">
+        <div class="search-input">
+            <input placeholder="Search for acronyms and terms" class="search-field" type="text" />
+            <button class="search-clear"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
+            <button disabled class="search-submit"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
+        </div>
+        <div class="search-results">
+    
+        </div>
+    </div>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.filter%2CString.prototype.includes%2CArray.prototype.includes"></script>
+    
+    <script>
+    $(document).ready(function(){
+        $("#g-search-app").closest(".ms-WPBody").css("overflow-x","visible"); 
+    
+        var $input = $("#g-search-app .search-input"),
+            $field = $($input).find(".search-field"),
+            $clear = $($input).find(".search-clear"),
+            $submit = $($input).find(".search-submit"),
+            $results = $("#g-search-app .search-results"); 
+    
+        $($field).on("focus",function(e){
+            $($input).addClass("focused");
+            $($field).attr("placeholder", "");
+        })
+        .on("blur",function(){
+            $($input).removeClass("focused");
+            if(!$($field).val()) {
+                $($field).attr("placeholder", "Search for acronyms and terms");
+            }
+        })
+        .on("input",function(){
+            fillCheck();
+        });
+        $($clear).on("click",function(e){
+            e.preventDefault(); 
+            $($field).val("");
+            $($field).focus(); 
+            fillCheck(); 
+            return false ; 
+        });
+        $($field).on('keydown',function(e){
+            if(e.keyCode == 13) {
+                sendSearch();
+                return false ;
+            }
+        });
+        $($submit).on("click", function(e){
+            e.preventDefault();
+            sendSearch(); 
+            return false;
+        })
+        function sendSearch() {
+            var val = $($field).val();
+            if(val.length < 2) {
+                return false; 
+            }
+            val = encodeURI(val.toLowerCase()); 
+            window.location.href = "http://sites.mercer.com/sites/glossary/SitePages/glossary%20search.aspx?q="+val
+        }
+    
+    
+        function fillCheck() {
+            $($clear).hide();
+            $($submit).attr("disabled", true);
+        
+            if($($field).val()) {
+                $($clear).show();
+                $($submit).attr("disabled", false );
+            }
+        }
+        
+        if(getUrlVars().q) {
+            var q = decodeURI(getUrlVars().q).trim();
+            $($field).val(q);
+            fillCheck(); 
+            getThing(decodeURI(q));
+        }
+        $("#g-search-app").css("visibility", "visible");
+        
+    
+        function getThing(query) {
+            $($results).html("<div class='loader-bar' />");
+            document.title = '"' + query + '" - Search - Mercer Glossary';
+            var queryString = query.trim(); 
+            var q = [];
+            var term = query.trim().split(" ").filter(function(e,i){
+                return e.length > 1; 
+            });
+            $(term).each(function(i,e) {
+                var fields = ["Title", "Description", "OriginalDescription"];
+                var term = e;
+                $(fields).each(function(i,e){
+                    var CAML = ("<Contains><FieldRef Name='[thename]' /><Value Type='Text'>[theterm]</Value></Contains>")
+                            .replace("[thename]",e )
+                            .replace("[theterm]", term);
+                // console.log(CAML);
+                    q.push(CAML);
+                });
+            });
+            q = queryBuilder(q);
+            var query = {
+                "query": {
+                    '__metadata': { 'type': 'SP.CamlQuery' },
+                    'ViewXml' : "<View><Query><Where> "+q+"</Where> </Query><ViewFields><FieldRef Name='Title' /><FieldRef Name='Description' /><FieldRef Name='OriginalDescription' /><FieldRef Name='ID' /></ViewFields></View>"
+                }   
+            }
+            $.ajax({
+                type: "POST", 
+                headers: { 
+                    "accept": "application/json;odata=verbose",
+                    "content-type": "application/json;odata=verbose",
+                    "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                }, 
+                data: JSON.stringify(query),
+                url: "http://sites.mercer.com/sites/glossary/_api/web/lists/getbytitle('All Content')/GetItems", 
+                success: function(data){
+                 
+                    var results = data.d.results; 
+             
+                     parseResults(data.d.results, term,queryString)
+                },
+                failure: function(d) {
+                    console.log(d);
+                }
+            });
+        }
+       // getThing(getUrlVars().q);
+       
+        function parseResults(data,terms, query) {
+            $($results).html("");
+            var filtered = data.filter(function(e,i){
+                var passed = [],
+                term = e,
+                tester = e.Title + " " + e.Description + " " + e.OriginalDescription; 
+               
+                columns = ["Title", "Description", "OriginalDescription"];
+                passed = terms.filter(function(e){
+                    return tester.toLowerCase().includes(e.toLowerCase());
+                }) ;
+                return passed.length == terms.length;  
+            });
+            filtered = filtered.sort(function(a,b){
+                if(a.Title.toLowerCase().trim() === query.toLowerCase()) {
+                    console.log('match');
+                    return -1; 
+                   
+                }
+            
+                if(a.Title.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+                    return 0; 
+                }
+                if(a.Title.toLowerCase().includes(query.toLowerCase())) {
+                    return 0;
+                }
+                return 1; 
+            });
+    
+            if(!filtered.length) {
+                $($results).append('<div class="result-item"><div class="result-item-description">We couldn&rsquo;t find anything that matches your search. Try searching again for something else or <a href="http://sites.mercer.com/sites/glossary/default.aspx">browse the glossary</a>.</div></div>');
+                return false; 
+            }
+            var filtered = filtered.slice(0,24);
+    
+            $(filtered).each(function(i,e){
+                var url = "http://sites.mercer.com/sites/glossary/Lists/All%20Content/DispForm.aspx?ID="+e.ID;
+                var desc = HTMLClean(e.Description)  || HTMLClean(e.OriginalDescription) ||  "";
+                var template = '<div class="result-item"><a class="result-item-title" href="'+url+'">'+e.Title+'</a><div class="result-item-description">'+desc+'</div></div>';
+           
+                $($results).append(template);
+            })
+        }
+    
+        
+    
+    
+        
+    });
+    
+    
+    function getUrlVars(path) {
+        var p = path || window.location.href;
+        var vars = {};
+        var parts = p.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+    }
+    
+    function queryBuilder(q) {
+        var string = [];
+        
+        if(q.length === 1) {
+            return q.join("");
+        }
+        var count = 0;
+        var steps = q.length - 2; 
+        for (var i = 0; i <= steps; i++) {
+            string.push('<Or>');
+            string.push(q[i]);
+            if(i === steps) {
+                string.push(q[i+1]);
+            }
+        }
+        for (var i = 0; i < q.length - 1; i++) {
+            string.push("</Or>");
+        }
+       
+        return string.join("");
+      
+    }
+    
+    
+    function HTMLClean(string) {
+        if(!string) {
+            return string; 
+        }
+        var allowed_tags = [ 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul','ol','nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'div','table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'iframe','img' ];
+    
+        var p = document.createElement("div");
+        $(p).html(string);
+       
+    
+        $(p).find('*').each(function(i,e){
+    
+            if($.inArray($(e).prop("tagName").toLowerCase(),allowed_tags) === -1) {
+    
+            $(e).contents().unwrap();
+    
+    
+    
+            }
+    
+            $(this).removeAttr('style').removeAttr('dir');
+    
+            if($(this).prop('tagName').toLowerCase() !== "img") {
+    
+            $(this).removeAttr('src');
+    
+            }
+    
+        });
+    
+        return $(p).html();
+    }
+    
+    </script> 
