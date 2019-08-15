@@ -1,6 +1,19 @@
-.searchInput {
+.barWrap {
+    position:relative;
+    z-index: 99;
     margin-top: 12px; 
-    display:flex;
+}
+.spacer {
+    height: 42px;
+}
+
+.searchInput {
+    position:absolute;
+    left: 0;
+    top: 0;
+    width: 100%; 
+    
+    
 
     background: #fafafa;
     box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 4px 0 rgba(0,0,0,0.1), 0 0 6px 0 rgba(0,0,0,0.06);
@@ -10,31 +23,35 @@
     &.focused {
         box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 12px 0 rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,.12);
     }
-    button {
-        margin: 0;
-        padding: 0;
-        border: 0;
-        background: none;
-        position:relative;
-        width: 42px;
-        height: 42px; 
-        cursor: pointer; 
-        &.searchSubmit {
-            background:#005c96; 
-            fill: white; 
-        }
-        > svg {
-            display:block;
-            width: 24px;
-            height: 24px;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%,-50%);
-        }
+    
+}
+.searchBar {
+    display:flex;
+}
+.searchButton {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    position:relative;
+    width: 42px;
+    height: 42px; 
+    cursor: pointer; 
+    &.searchSubmit {
+        background:#005c96; 
+        fill: white; 
+    }
+    > svg {
+        display:block;
+        width: 24px;
+        height: 24px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
     }
 }
-input.searchField {
+input.searchField, .searchField {
     border: 0;
     padding: 12px;
     height: 42px;
@@ -49,4 +66,21 @@ input.searchField {
         display:none; 
     }
     
+}
+.suggestList {
+    border-top: 1px solid #e6e6e6;
+    &Item {
+        padding: 12px;
+        font-size: 16px;
+        color: black; 
+        line-height: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        &.highlighted, &:hover {
+            background: #E0F1F4;
+            
+        }
+    }
 }

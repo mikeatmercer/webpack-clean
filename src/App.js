@@ -6,19 +6,24 @@ import LoaderBar from "./LoaderBar";
 import searchApp from "./searchApp";
 import HTMLClean from "./util/HTMLclean";
 
+
 export default class App extends Component {
-    constructor() {
+    constructor(props) {
         super();
-        
         this.state = {
             results: [],
             query : (getUrlVars().q) ? decodeURI(getUrlVars().q) : null ,
             searching: false,
             error: false,
-            completedSearch: false
+            completedSearch: false,
+            okComplete: false,
+            queryurl : `${props.site}/_api/web/lists/getbytitle('${props.list}')/GetItems`
         }
+       
     }
     componentWillMount() {
+        
+
         const acceptResult = function(results) {
             this.setState({
                 searching: false,
@@ -32,13 +37,12 @@ export default class App extends Component {
             return ;
         }
         this.setState({searching: this.state.query})
-        console.log(this.state.query);
+
         searchApp(
             {
                 query: this.state.query,
-                list: this.props.list,
-                site: this.props.site ,
-                otherColumns: (this.props.othercolumns) ? this.props.othercolumns.split(',') : []
+                url: this.state.queryurl,
+                otherColumns: (this.props.othercolumns) ? this.props.othercolumns.split(',') : [],
             }, acceptResult
         )
 
@@ -48,7 +52,7 @@ export default class App extends Component {
         let noResults = (!s.results.length && s.completedSearch) ? <div class={style.resultItem}>We couldn't find want you were looking for. Try searching for something else</div> : null;
 
         return <div className={style.gSearchApp}>
-            <InputField disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage}/>
+            <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage}/>
             {loader}
             {noResults}
             <ResultList
