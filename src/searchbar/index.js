@@ -24,14 +24,12 @@ function Bolder(p) {
 function AutoListItem(p) {
     function sender(e) {
         e.preventDefault();
-        console.log(p.queryString);
+        
         p.sendQuery(p.queryString)
     }
-    function over(e) {
-        console.log("over")
-    }
+   
 
-    return <div className={`${style.suggestListItem} ${p.highlighted}`} onMouseOver={over} onClick={sender}>
+    return <div className={`${style.suggestListItem} ${p.highlighted}`}  onClick={sender}>
         {p.text}
     </div>
 }
@@ -40,14 +38,13 @@ function AutoList(p) {
     let list = p.autoList.map(function(e,i){
         let highlighted = (i == p.highlighted) ? style.highlighted : ""
         return <AutoListItem 
+            order={p.highlighted}
             highlighted={highlighted}
             queryString={e.title}
             text={<Bolder query={p.query} string={e.title} />} 
             sendQuery={p.sendQuery}
         />
-        /*return <div key={e.id} className={`${style.suggestListItem} ${highlighted}`}>
-           <Bolder query={p.query} string={e.title} />
-        </div>*/
+        
     });
     let hide = (!p.focused || !p.autoList.length) ? "none" : ""
 
@@ -57,6 +54,7 @@ function AutoList(p) {
     </div>
 }
 
+
 export default class SearchBar extends Component {
     constructor(props) {
         super();
@@ -65,26 +63,78 @@ export default class SearchBar extends Component {
             text: props.query || "",
             showAuto: false,
             autoList: [],
-           currentOrder: -1
+           currentOrder: -1,
+           typing: false,
+           savedText: "",
+          
         }
         this.sendNew = this.sendNew.bind(this);
         this.textInput = this.textInput.bind(this);
-        this.createAuto = this.createAuto.bind(this)
-        this.sendAuto;
-    }
-    toggleFocus() {
+        this.createAuto = this.createAuto.bind(this);
         
+        this.sendAuto;
+        this.toggleFocus = this.toggleFocus.bind(this);
+    }
+   
+    toggleFocus(value,timing,order) {
+       // return;
+        let t = timing || 100;
+        let v = value || !this.state.focused
+        let o = order || -1
+      
         setTimeout(function(){
-            this.setState({focused: !this.state.focused,currentOrder: -1})
-        }.bind(this),100)
+            this.setState({focused: v,currentOrder:o, savedText: this.state.text})
+        }.bind(this),t)
     }
     handleEnter(e) {
+        console.log(this.autoInput);
         if(e.keyCode == 13) {
             e.preventDefault();
             this.sendNew();
             
             return false ;
         }
+        const protectKeys = [13,38,40];
+        if(protectKeys.includes(e.keyCode)) {
+            
+            e.preventDefault();
+        } else {
+            this.setState({dontFlip: false});
+            return;
+        }
+        
+        let newOrder = this.state.currentOrder;
+        switch(e.keyCode) {
+            //KEY UP
+            case 38:
+                newOrder = (newOrder !== -1) ? newOrder - 1 : this.state.autoList.length - 1
+                break;
+            //KEY DOWN
+            case 40: 
+                newOrder = (newOrder !== this.state.autoList.length - 1) ? newOrder + 1 : -1;
+                break;
+        }   
+        if(newOrder === this.state.currentOrder) {
+            return ; 
+        } 
+        console.log(e.keyCode); 
+        /*
+        if(newOrder === -1) {
+            this.currentInput.focus();
+        } else {
+            this.autoInput.focus(); 
+        } 
+        */ 
+        this.setState({
+            dontFlip: true,
+            currentOrder: newOrder,
+        },function(){
+            this.setState({text: (newOrder === -1)? this.state.savedText : this.state.autoList[newOrder].title})
+            
+        }.bind(this));
+        
+        /**/
+
     }
     createAuto(val) {
        
@@ -93,19 +143,22 @@ export default class SearchBar extends Component {
             return; 
         }
         
-        /*let newList = this.state.autoList.filter(e => e.toLowerCase().includes(this.state.text.toLowerCase()))
-        console.log(newList);
-        this.setState({autoList:newList})
-        if(newList.length ) {
-            return; 
-        } */
-        //this.setState({autoList: []});
-        //Fetch More
         const autoReturn = function(returnData) {
-           
+           if(this.state.typing) {
+               return; 
+           }
+           let results = [];
+           let usedTerms = [];
+           returnData.data.d.results.forEach(function(e){
+               if(usedTerms.includes(e.Title.toLowerCase())) {
+                   return; 
+               }
+               usedTerms.push(e.Title.toLowerCase());
+               results.push(e);
+           });
             this.setState({
                 showAuto: true,
-                autoList: returnData.data.d.results.map(function(e){
+                autoList:results.map(function(e){
                     return {
                         id: e.id,
                         title: e.Title.toLowerCase()
@@ -115,29 +168,31 @@ export default class SearchBar extends Component {
 
         }.bind(this);
         this.sendAuto = setTimeout(function() {
+            this.setState({typing: false})
             CAMLsender({
                 type: "POST",
                 url: this.props.autoUrl,
                 callback: autoReturn,
                 CAML: `<View><RowLimit>8</RowLimit><Query><Where><BeginsWith><FieldRef Name='Title' /><Value Type='Text'>${this.state.text}</Value></BeginsWith></Where> </Query></View>`
             })
-        }.bind(this),250)
+        }.bind(this),200)
         
     }
     textInput(e) {
+        console.log('text input');
         clearTimeout(this.sendAuto);
+        if(this.state.dontFlip) {
+            return; 
+        }
+       
         this.setState({
             text: e.target.value,
             showAuto: false,
-            currentOrder: -1
+            currentOrder: -1,
+            typing: true,
+            savedText: e.target.value.toLowerCase(),
+            dontFlip: false
         },this.createAuto);
-        /*
-        if(e.target.value.length > 1) {
-            this.sendAuto = setTimeout(function(){
-                this.createAuto(e.target.value);
-            }.bind(this),300);
-        }
-        */
     }
     sendNew(value) {
         let v = value || this.state.text;
@@ -148,33 +203,58 @@ export default class SearchBar extends Component {
         let url =( (this.props.searchpage) || window.location.href.split("?")[0] ) + `?q=${v}`;
         window.location.href = url ; 
     }
-  
+
+    
 
     render(p,s) {
         let placeholder = p.placeholdertext || "Search...";
         placeholder = (s.focused) ? "" : placeholder;
         let focusClass = (s.focused) ? style.focused : ""; 
+     
+        let shouldBlur = function(e) {
+            if(e.type === "focus") {
+                console.log('current focused')
+                this.toggleFocus(true, 0, -1);
+                return 
+            }
+            this.toggleFocus(false);
+          
+        }.bind(this);
+
+        let currentInput =  <input  onKeyDown={this.handleEnter.bind(this)} 
+        
+        disabled={p.disabled} 
+         className={style.searchField}
+        placeholder={placeholder} 
+        onFocus={shouldBlur} 
+        onBlur={shouldBlur}
+        type="text" value={s.text}  
+        onInput={this.textInput}
+        ref={currentInput => this.currentInput = currentInput}
+       
+        /> 
+      
+            
+       
+      
+
 
         
         return (
             <div className={style.barWrap}>
             <div className={style.spacer} />
             <div className={`${style.searchInput} ${focusClass}`}>
+        
                 <div className={style.searchBar}>
-                <input  onKeyDown={this.handleEnter.bind(this)} 
-                        disabled={p.disabled} 
-                        className={style.searchField} 
-                        placeholder={placeholder} 
-                        onFocus={this.toggleFocus.bind(this)} 
-                        onBlur={this.toggleFocus.bind(this)}
-                        type="text" value={s.text}  
-                        onInput={this.textInput}/>
-                <SearchButton searchClick={this.sendNew} />
+
+                    {currentInput}
+                   
+                    <SearchButton searchClick={this.sendNew} />
                 </div>
                 <AutoList 
-        autoList={ s.autoList.filter(e => e.title.toLowerCase().includes(this.state.text.toLowerCase()))}
+        autoList={ s.autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase()))}
         highlighted={s.currentOrder}
-        query={this.state.text}
+        query={this.state.savedText}
         sendQuery={this.sendNew}
         focused={s.focused}
     />

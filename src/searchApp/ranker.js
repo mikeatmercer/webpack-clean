@@ -45,7 +45,7 @@ export default function(query,queryArray,results,columns) {
 
 function cheapoTest(textString,query,queryArray) {
     let tString =(textString) ? textString.toLowerCase() : '',
-        stringArray = tString.split(" ").map(e => e.toLowerCase()),
+        stringArray = tString.split(" ").map(e => e.toLowerCase()).filter(e => e.length > 2),
         rank = 0;
     //Check for Full query in string
     //console.log(query);

@@ -59,6 +59,9 @@ input.searchField, .searchField {
     background: none; 
     outline: none; 
     flex: 1; 
+    &.auto {
+        background: black; 
+    }
     &:-ms-input-placeholder {
         color:rgba(0,0,0,.6);
     }

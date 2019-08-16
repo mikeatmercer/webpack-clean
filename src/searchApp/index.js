@@ -11,7 +11,7 @@ export default function(searchSchema, callback) {
         }
     searchColumns = searchColumns.filter((item,index,self) => self.indexOf(item) === index);
     var queryArray = searchSchema.query.trim().split(" ").filter(function(e,i){
-        return e.length > 0; 
+        return e.length > 2; 
     });
 
     let CAMLQuery = queryBuilder(queryArray, searchColumns);
