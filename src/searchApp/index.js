@@ -4,10 +4,12 @@ import CAMLsender from "../util/CAMLsender";
 
 
 export default function(searchSchema, callback) {
-  
+
+    let title = searchSchema.titleColumn; 
+    
     let searchColumns = (searchSchema.otherColumns ) ? searchSchema.otherColumns.map(e => e.trim()) : [];
-        if(!searchColumns.includes("Title")) {
-            searchColumns.push("Title");
+        if(!searchColumns.includes(title)) {
+            searchColumns.push(title);
         }
     searchColumns = searchColumns.filter((item,index,self) => self.indexOf(item) === index);
     var queryArray = searchSchema.query.trim().split(" ").filter(function(e,i){
@@ -22,7 +24,7 @@ export default function(searchSchema, callback) {
             return; 
         }
         let results = returnPackage.data.d.results; 
-        var ranked = ranker(searchSchema.query, queryArray, results, searchColumns.filter(e => e !== "Title"));
+        var ranked = ranker(searchSchema.query, queryArray, results, searchColumns.filter(e => e !== title),title);
              //parseResults(data.d.results, term,queryString)
         callback({
         items: ranked,

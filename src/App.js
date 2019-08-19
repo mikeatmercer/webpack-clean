@@ -22,8 +22,7 @@ export default class App extends Component {
        
     }
     componentWillMount() {
-        
-
+        document.title = this.props.pagetitle || "Search";
         const acceptResult = function(results) {
             this.setState({
                 searching: false,
@@ -38,10 +37,13 @@ export default class App extends Component {
         }
         this.setState({searching: this.state.query})
 
+        document.title = `"${this.state.query}" - ${(this.props.pagetitle || "Search")}`
+
         searchApp(
             {
                 query: this.state.query,
                 url: this.state.queryurl,
+                titleColumn: this.props.titlecolumn || "Title", 
                 otherColumns: (this.props.othercolumns) ? this.props.othercolumns.split(',') : [],
             }, acceptResult
         )
@@ -52,7 +54,7 @@ export default class App extends Component {
         let noResults = (!s.results.length && s.completedSearch) ? <div class={style.resultItem}>We couldn't find want you were looking for. Try searching for something else</div> : null;
 
         return <div className={style.gSearchApp}>
-            <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage}/>
+            <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage } titleColumn={this.props.titlecolumn}/>
             {loader}
             {noResults}
             <ResultList

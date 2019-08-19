@@ -74,6 +74,7 @@ export default class SearchBar extends Component {
         
         this.sendAuto;
         this.toggleFocus = this.toggleFocus.bind(this);
+        this.tc = props.titleColumn; 
     }
    
     toggleFocus(value,timing,order) {
@@ -87,7 +88,7 @@ export default class SearchBar extends Component {
         }.bind(this),t)
     }
     handleEnter(e) {
-        console.log(this.autoInput);
+
         if(e.keyCode == 13) {
             e.preventDefault();
             this.sendNew();
@@ -117,14 +118,7 @@ export default class SearchBar extends Component {
         if(newOrder === this.state.currentOrder) {
             return ; 
         } 
-        console.log(e.keyCode); 
-        /*
-        if(newOrder === -1) {
-            this.currentInput.focus();
-        } else {
-            this.autoInput.focus(); 
-        } 
-        */ 
+
         this.setState({
             dontFlip: true,
             currentOrder: newOrder,
@@ -147,13 +141,14 @@ export default class SearchBar extends Component {
            if(this.state.typing) {
                return; 
            }
+           let title = this.tc;
            let results = [];
            let usedTerms = [];
            returnData.data.d.results.forEach(function(e){
-               if(usedTerms.includes(e.Title.toLowerCase())) {
+               if(usedTerms.includes(e[title].toLowerCase())) {
                    return; 
                }
-               usedTerms.push(e.Title.toLowerCase());
+               usedTerms.push(e[title].toLowerCase());
                results.push(e);
            });
             this.setState({
@@ -161,7 +156,7 @@ export default class SearchBar extends Component {
                 autoList:results.map(function(e){
                     return {
                         id: e.id,
-                        title: e.Title.toLowerCase()
+                        title: e[title].toLowerCase()
                     }   
                 })
             })
@@ -173,13 +168,13 @@ export default class SearchBar extends Component {
                 type: "POST",
                 url: this.props.autoUrl,
                 callback: autoReturn,
-                CAML: `<View><RowLimit>8</RowLimit><Query><Where><BeginsWith><FieldRef Name='Title' /><Value Type='Text'>${this.state.text}</Value></BeginsWith></Where> </Query></View>`
+                CAML: `<View><RowLimit>8</RowLimit><Query><Where><BeginsWith><FieldRef Name='${this.tc}' /><Value Type='Text'>${this.state.text}</Value></BeginsWith></Where> </Query></View>`
             })
-        }.bind(this),200)
+        }.bind(this),150)
         
     }
     textInput(e) {
-        console.log('text input');
+      
         clearTimeout(this.sendAuto);
         if(this.state.dontFlip) {
             return; 
@@ -213,7 +208,7 @@ export default class SearchBar extends Component {
      
         let shouldBlur = function(e) {
             if(e.type === "focus") {
-                console.log('current focused')
+  
                 this.toggleFocus(true, 0, -1);
                 return 
             }

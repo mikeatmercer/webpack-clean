@@ -1,4 +1,4 @@
-export default function(query,queryArray,results,columns) {
+export default function(query,queryArray,results,columns,titleColumn) {
     
    
     let rankedResults = results.map(function(e){
@@ -7,7 +7,7 @@ export default function(query,queryArray,results,columns) {
         let result = e;
         let rank = 0;
         let q = query.toLowerCase().trim();
-        let title = e.Title.toLowerCase().trim()
+        let title = e[titleColumn].toLowerCase().trim()
         //Title Match
         if(title === q) {
             rank += 100; 
