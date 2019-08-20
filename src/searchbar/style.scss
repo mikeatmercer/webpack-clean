@@ -1,6 +1,6 @@
 .barWrap {
     position:relative;
-    z-index: 99;
+    z-index: 10;
     margin-top: 12px; 
 }
 .spacer {
@@ -18,12 +18,32 @@
     background: #fafafa;
     box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 4px 0 rgba(0,0,0,0.1), 0 0 6px 0 rgba(0,0,0,0.06);
     border-radius: 2px;
-    overflow:hidden; 
-    transition: box-shadow .25s;
+    
+    display: flex;
+    justify-content: flex-end;
+    
     &.focused {
         box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 12px 0 rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,.12);
     }
+    &.animating {
+        transition: box-shadow .25s;
+    }
+    &.listOpen {
+        box-shadow: none; 
+    }
     
+}
+.inputDrop {
+    background: #fafafa;
+    width: calc(100% - 42px);
+    position:absolute;
+    left: 0;
+    top: 0;
+    border-radius: 2px 0 0 2px;
+    &.listOpen {
+        box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 12px 0 rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,.12);
+        border-radius: 2px 0 2px 2px;
+    }
 }
 .searchBar {
     display:flex;
@@ -36,7 +56,11 @@
     position:relative;
     width: 42px;
     height: 42px; 
+    border-radius: 0 2px 2px 0;
     cursor: pointer; 
+    &.listOpen {
+        box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 4px 0 rgba(0,0,0,0.1), 0 0 6px 0 rgba(0,0,0,0.06);
+    }
     &.searchSubmit {
         background:#005c96; 
         fill: white; 
@@ -58,7 +82,8 @@ input.searchField, .searchField {
     font-size: 16px;
     background: none; 
     outline: none; 
-    flex: 1; 
+    width: 100%;
+    display: block;
     &.auto {
         background: black; 
     }

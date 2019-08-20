@@ -37,7 +37,7 @@ export default class App extends Component {
         }
         this.setState({searching: this.state.query})
 
-        document.title = `"${this.state.query}" - ${(this.props.pagetitle || "Search")}`
+        document.title = `${this.state.query} - ${(this.props.pagetitle || "Search")}`
 
         searchApp(
             {

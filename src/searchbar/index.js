@@ -8,7 +8,7 @@ function SearchButton(p) {
         p.searchClick();
     }
 
-    return <button className={`${style.searchButton} ${style.searchSubmit}`} onClick={searchClick}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
+    return <button className={`${style.searchButton} ${style.searchSubmit} ${p.listOpen}`} onClick={searchClick}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
 }
 
 function Bolder(p) {
@@ -66,6 +66,7 @@ export default class SearchBar extends Component {
            currentOrder: -1,
            typing: false,
            savedText: "",
+           animating: false
           
         }
         this.sendNew = this.sendNew.bind(this);
@@ -73,18 +74,29 @@ export default class SearchBar extends Component {
         this.createAuto = this.createAuto.bind(this);
         
         this.sendAuto;
+        this.animatingTimer;
         this.toggleFocus = this.toggleFocus.bind(this);
         this.tc = props.titleColumn; 
+        this.animating = this.animating.bind(this);
     }
-   
+    animating(callback) {
+        let initiate = () => {
+            this.animatingTimer = setTimeout(function(){
+                this.setState({animating: false});
+            }.bind(this),250)
+        };
+        this.setState({animating:true},initiate)
+    }
     toggleFocus(value,timing,order) {
+        clearTimeout(this.animatingTimer);
        // return;
         let t = timing || 100;
         let v = value || !this.state.focused
         let o = order || -1
+
       
         setTimeout(function(){
-            this.setState({focused: v,currentOrder:o, savedText: this.state.text})
+            this.setState({focused: v,currentOrder:o, savedText: this.state.text},this.animating);
         }.bind(this),t)
     }
     handleEnter(e) {
@@ -205,6 +217,7 @@ export default class SearchBar extends Component {
         let placeholder = p.placeholdertext || "Search...";
         placeholder = (s.focused) ? "" : placeholder;
         let focusClass = (s.focused) ? style.focused : ""; 
+        let animatingClass = (s.animating) ? style.animating : "";
      
         let shouldBlur = function(e) {
             if(e.type === "focus") {
@@ -228,7 +241,8 @@ export default class SearchBar extends Component {
         ref={currentInput => this.currentInput = currentInput}
        
         /> 
-      
+        let autoList = s.autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase()));
+        let openClass = (!s.focused || !autoList.length)? "" : style.listOpen; 
             
        
       
@@ -238,21 +252,21 @@ export default class SearchBar extends Component {
         return (
             <div className={style.barWrap}>
             <div className={style.spacer} />
-            <div className={`${style.searchInput} ${focusClass}`}>
-        
-                <div className={style.searchBar}>
-
+            <div className={`${style.searchInput} ${animatingClass} ${focusClass} ${openClass}`}>
+                <div className={`${style.inputDrop} ${openClass} `}>
                     {currentInput}
-                   
-                    <SearchButton searchClick={this.sendNew} />
-                </div>
-                <AutoList 
-        autoList={ s.autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase()))}
+                    <AutoList 
+        autoList={ autoList}
         highlighted={s.currentOrder}
         query={this.state.savedText}
         sendQuery={this.sendNew}
         focused={s.focused}
-    />
+                    />
+                </div>
+                <SearchButton searchClick={this.sendNew} listOpen={openClass} />
+        
+                
+                
             </div>
             
             
