@@ -35,7 +35,7 @@ function AutoListItem(p) {
 }
 function AutoList(p) {
     
-    let list = p.autoList.map(function(e,i){
+    let list = p.autoList.map((e,i) => {
         let highlighted = (i == p.highlighted) ? style.highlighted : ""
         return <AutoListItem 
             order={p.highlighted}
@@ -70,20 +70,17 @@ export default class SearchBar extends Component {
           
         }
         this.sendNew = this.sendNew.bind(this);
-        this.textInput = this.textInput.bind(this);
         this.createAuto = this.createAuto.bind(this);
-        
         this.sendAuto;
         this.animatingTimer;
-        this.toggleFocus = this.toggleFocus.bind(this);
         this.tc = props.titleColumn; 
         this.animating = this.animating.bind(this);
     }
-    animating(callback) {
+    animating() {
         let initiate = () => {
-            this.animatingTimer = setTimeout(function(){
+            this.animatingTimer = setTimeout(() => {
                 this.setState({animating: false});
-            }.bind(this),250)
+            },250)
         };
         this.setState({animating:true},initiate)
     }
@@ -95,9 +92,9 @@ export default class SearchBar extends Component {
         let o = order || -1
 
       
-        setTimeout(function(){
+        setTimeout(() => {
             this.setState({focused: v,currentOrder:o, savedText: this.state.text},this.animating);
-        }.bind(this),t)
+        },t)
     }
     handleEnter(e) {
 
@@ -134,10 +131,10 @@ export default class SearchBar extends Component {
         this.setState({
             dontFlip: true,
             currentOrder: newOrder,
-        },function(){
+        },() => {
             this.setState({text: (newOrder === -1)? this.state.savedText : this.state.autoList[newOrder].title})
             
-        }.bind(this));
+        });
         
         /**/
 
@@ -149,14 +146,14 @@ export default class SearchBar extends Component {
             return; 
         }
         
-        const autoReturn = function(returnData) {
+        const autoReturn = (returnData) => {
            if(this.state.typing) {
                return; 
            }
            let title = this.tc;
            let results = [];
            let usedTerms = [];
-           returnData.data.d.results.forEach(function(e){
+           returnData.data.d.results.forEach(e => {
                if(usedTerms.includes(e[title].toLowerCase())) {
                    return; 
                }
@@ -165,7 +162,7 @@ export default class SearchBar extends Component {
            });
             this.setState({
                 showAuto: true,
-                autoList:results.map(function(e){
+                autoList:results.map(e => {
                     return {
                         id: e.id,
                         title: e[title].toLowerCase()
@@ -173,8 +170,9 @@ export default class SearchBar extends Component {
                 })
             })
 
-        }.bind(this);
-        this.sendAuto = setTimeout(function() {
+        };
+
+        this.sendAuto = setTimeout(() => {
             this.setState({typing: false})
             CAMLsender({
                 type: "POST",
@@ -182,7 +180,7 @@ export default class SearchBar extends Component {
                 callback: autoReturn,
                 CAML: `<View><RowLimit>8</RowLimit><Query><Where><BeginsWith><FieldRef Name='${this.tc}' /><Value Type='Text'>${this.state.text}</Value></BeginsWith></Where> </Query></View>`
             })
-        }.bind(this),150)
+        },150)
         
     }
     textInput(e) {
@@ -218,60 +216,37 @@ export default class SearchBar extends Component {
         placeholder = (s.focused) ? "" : placeholder;
         let focusClass = (s.focused) ? style.focused : ""; 
         let animatingClass = (s.animating) ? style.animating : "";
-     
-        let shouldBlur = function(e) {
-            if(e.type === "focus") {
-  
-                this.toggleFocus(true, 0, -1);
-                return 
-            }
-            this.toggleFocus(false);
-          
-        }.bind(this);
-
-        let currentInput =  <input  onKeyDown={this.handleEnter.bind(this)} 
-        
-        disabled={p.disabled} 
-         className={style.searchField}
-        placeholder={placeholder} 
-        onFocus={shouldBlur} 
-        onBlur={shouldBlur}
-        type="text" value={s.text}  
-        onInput={this.textInput}
-        ref={currentInput => this.currentInput = currentInput}
-       
-        /> 
         let autoList = s.autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase()));
         let openClass = (!s.focused || !autoList.length)? "" : style.listOpen; 
-            
-       
-      
-
-
+     
         
+      
         return (
             <div className={style.barWrap}>
             <div className={style.spacer} />
             <div className={`${style.searchInput} ${animatingClass} ${focusClass} ${openClass}`}>
                 <div className={`${style.inputDrop} ${openClass} `}>
-                    {currentInput}
+                    <input  
+                        onKeyDown={(e) => {this.handleEnter(e)}} 
+                        disabled={p.disabled} 
+                        className={style.searchField}
+                        placeholder={placeholder} 
+                        onFocus={()  => this.toggleFocus(true, 0, -1)} 
+                        onBlur={() => this.toggleFocus(false)}
+                        type="text" value={s.text}  
+                        onInput={(e) => {this.textInput(e)}}
+                        ref={currentInput => this.currentInput = currentInput}
+                    />
                     <AutoList 
-        autoList={ autoList}
-        highlighted={s.currentOrder}
-        query={this.state.savedText}
-        sendQuery={this.sendNew}
-        focused={s.focused}
+                        autoList={ autoList}
+                        highlighted={s.currentOrder}
+                        query={this.state.savedText}
+                        sendQuery={this.sendNew}
+                        focused={s.focused}
                     />
                 </div>
                 <SearchButton searchClick={this.sendNew} listOpen={openClass} />
-        
-                
-                
             </div>
-            
-            
-           
-                
             </div>
         )
     }

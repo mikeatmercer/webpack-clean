@@ -23,14 +23,14 @@ export default class App extends Component {
     }
     componentWillMount() {
         document.title = this.props.pagetitle || "Search";
-        const acceptResult = function(results) {
+        const acceptResult = (results) => {
             this.setState({
                 searching: false,
                 results: results.items || [],
                 error: results.error,
                 completedSearch: true
             })
-        }.bind(this);
+        };
         
         if(!this.state.query) {
             return ;
@@ -50,13 +50,13 @@ export default class App extends Component {
 
     }
     render(p,s) {
-        let loader = (s.searching) ? <LoaderBar /> : null;
-        let noResults = (!s.results.length && s.completedSearch) ? <div class={style.resultItem}>We couldn't find want you were looking for. Try searching for something else</div> : null;
+      
+       
 
         return <div className={style.gSearchApp}>
             <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage } titleColumn={this.props.titlecolumn}/>
-            {loader}
-            {noResults}
+            {(s.searching) ? <LoaderBar /> : null}
+            {(!s.results.length && s.completedSearch) ? <div class={style.resultItem}>We couldn't find want you were looking for. Try searching for something else</div> : null}
             <ResultList
                 items={s.results}
                 site={p.site}
@@ -73,7 +73,7 @@ function ResultList(p) {
     }
 
     
-    const listItems = p.items.slice(0,50).map((e,i) => {
+    const listItems = p.items.slice(0,50).map(e => {
         return <div key={e.ID} class={style.resultItem}>
             <a class={style.resultTitle} target="_blank" href={`${p.site}/Lists/${p.list}/DispForm.aspx?ID=${e.ID}`}>
                 {e.Title}
