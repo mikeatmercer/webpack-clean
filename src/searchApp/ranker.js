@@ -1,7 +1,7 @@
 export default function(query,queryArray,results,columns,titleColumn) {
     
    
-    let rankedResults = results.map(function(e){
+    let rankedResults = results.map(e => {
         
        
         let result = e;
@@ -20,18 +20,14 @@ export default function(query,queryArray,results,columns,titleColumn) {
         if(title.includes(q)) {
             rank += 30;
         }
-        queryArray.forEach(function(e){
+        queryArray.forEach(e => {
             if(title.includes(e)) {
                 rank += 20; 
             }
         });
-        
 
-        //Cheapo Test
-        //console.log(rank);
-        
         columns.forEach(e => {
-           // console.log(e);
+      
             rank+= cheapoTest(result[e],q,queryArray)
         });
         result.rank = rank;
@@ -44,19 +40,18 @@ export default function(query,queryArray,results,columns,titleColumn) {
 }
 
 function cheapoTest(textString,query,queryArray) {
+    const reMaker = (re) =>  new RegExp(re.toLowerCase().trim(),"g");
+    
     let tString =(textString) ? textString.toLowerCase() : '',
-        stringArray = tString.split(" ").map(e => e.toLowerCase()).filter(e => e.length > 2),
-        rank = 0;
-    //Check for Full query in string
-    //console.log(query);
-    let re = new RegExp(query.toLowerCase().trim(),"g");
-    let fullMatches = tString.match(re )
+        rank = 0,
+        fullMatches = tString.match(reMaker(query) );
+
     if(fullMatches) {
         
         rank+= (fullMatches.length * 10)
     }
-    stringArray.forEach(function(te){
-        queryArray.forEach(function(qe) {
+    tString.split(" ").map(e => e.toLowerCase()).filter(e => e.length > 2).forEach(te => {
+        queryArray.forEach(qe => {
             if(qe.toLowerCase() === te.toLowerCase()) {
                 rank += 1;
             }
@@ -64,8 +59,8 @@ function cheapoTest(textString,query,queryArray) {
     })
     
     //string term matches
-    queryArray.forEach(function(q){
-        let re = new RegExp(q.toLowerCase().trim(),"g");
+    queryArray.forEach(q => {
+        let re = reMaker(q);
         let termMatch = tString.match(re )
         if(termMatch) {
             rank+= (termMatch.length * .5);

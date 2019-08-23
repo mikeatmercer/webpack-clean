@@ -26,14 +26,7 @@ export default function(queryPackage) {
             }
             queryPackage.callback(returnPackage);
             return ;
-            var results = data.d.results; 
-    
-            var ranked = ranker(searchSchema.query, queryArray, data.d.results, searchColumns.filter(e => e !== "Title"));
-             //parseResults(data.d.results, term,queryString)
-             callback({
-                items: ranked,
-                error: false
-             })
+       
         },
         failure: function(d) {
             queryPackage.callback({data:{},error: true, success: false})

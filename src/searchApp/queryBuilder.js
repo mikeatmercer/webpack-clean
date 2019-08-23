@@ -3,8 +3,8 @@ export default function(queryArray,columns) {
         return false; 
     }
     let queries = []
-    columns.forEach(function(column){
-        queryArray.forEach(function(query){
+    columns.forEach((column) => {
+        queryArray.forEach((query) => {
             queries.push(`<Contains><FieldRef Name='${column}' /><Value Type='Text'>${query}</Value></Contains>`);
         })
     })
@@ -17,7 +17,6 @@ function orAdder(q) {
         if(q.length === 1) {
             return q.join("");
         }
-        var count = 0;
         var steps = q.length - 2; 
         for (var i = 0; i <= steps; i++) {
             string.push('<Or>');

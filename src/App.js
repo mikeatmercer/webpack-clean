@@ -66,15 +66,15 @@ export default class App extends Component {
     }
 }
 
-function ResultList(p) {
+const ResultList = (p) => {
     
     if(!p.items.length) {
         return null; 
     }
 
     
-    const listItems = p.items.slice(0,50).map(e => {
-        return <div key={e.ID} class={style.resultItem}>
+    const listItems = p.items.slice(0,50).map(e => (
+         <div key={e.ID} class={style.resultItem}>
             <a class={style.resultTitle} target="_blank" href={`${p.site}/Lists/${p.list}/DispForm.aspx?ID=${e.ID}`}>
                 {e.Title}
             </a>
@@ -83,6 +83,6 @@ function ResultList(p) {
             </div>
            
         </div>
-    } );
+     ) );
     return <div class={style.searchResults}>{listItems}</div>
 }

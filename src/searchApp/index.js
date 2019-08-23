@@ -24,10 +24,9 @@ export default function(searchSchema, callback) {
             return; 
         }
         let results = returnPackage.data.d.results; 
-        var ranked = ranker(searchSchema.query, queryArray, results, searchColumns.filter(e => e !== title),title);
-             //parseResults(data.d.results, term,queryString)
+      
         callback({
-        items: ranked,
+        items: ranker(searchSchema.query, queryArray, results, searchColumns.filter(e => e !== title),title),
         error: false
         })
     }
