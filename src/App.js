@@ -54,9 +54,9 @@ export default class App extends Component {
        
 
         return <div className={style.gSearchApp}>
-            <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage } titleColumn={this.props.titlecolumn}/>
+            <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage || null } titleColumn={this.props.titlecolumn}/>
             {(s.searching) ? <LoaderBar /> : null}
-            {(!s.results.length && s.completedSearch) ? <div class={style.resultItem}>We couldn't find want you were looking for. Try searching for something else</div> : null}
+            {(!s.results.length && s.completedSearch) ? <div class={`${style.resultItem} ${style.resultDescription}`}>We couldn't find want you were looking for. <br/>Try a different search or <a href="http://sites.mercer.com/sites/glossary/default.aspx">browse the glossary</a>.</div> : null}
             <ResultList
                 items={s.results}
                 site={p.site}
