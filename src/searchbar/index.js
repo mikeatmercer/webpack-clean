@@ -11,43 +11,49 @@ function SearchButton(p) {
     return <button className={`${style.searchButton} ${style.searchSubmit} ${p.listOpen}`} onClick={searchClick}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
 }
 
-const Bolder = (p) => {
-    var search = p.string.toLowerCase(),
-        needle = p.query.toLowerCase(),
+const Bolder = ({string,query}) => {
+    var search = string.toLowerCase(),
+        needle = query.toLowerCase(),
         start = search.indexOf(needle),
-        sec1 = p.string.substring(0,start),
-        sec2 = p.string.substring(start, start+needle.length),
-        sec3 = p.string.substring(start+needle.length) ;
+        sec1 = string.substring(0,start),
+        sec2 = string.substring(start, start+needle.length),
+        sec3 = string.substring(start+needle.length) ;
         return <span>{sec1}<strong>{sec2}</strong>{sec3}</span>
 }
 
-const AutoListItem = (p) => {
+const AutoListItem = ({sendQuery,highlighted}) => {
     function sender(e) {
         e.preventDefault();
         
-        p.sendQuery(p.queryString)
+        sendQuery(p.queryString)
     }
    
 
-    return <div className={`${style.suggestListItem} ${p.highlighted}`}  onClick={sender}>
+    return <div className={`${style.suggestListItem} ${highlighted}`}  onClick={sender}>
         {p.text}
     </div>
 }
 const AutoList = (p) => {
+    const {
+        autoList,
+        highlighted,
+        query,
+        sendQuery,
+        focused
+    } = p
     
-    
-    let list = p.autoList.map((e,i) => {
-        let highlighted = (i == p.highlighted) ? style.highlighted : ""
+    let list = autoList.map(({title},i) => {
+        let isHighlighted = (i == highlighted) ? style.highlighted : ""
         return <AutoListItem 
-            order={p.highlighted}
-            highlighted={highlighted}
-            queryString={e.title}
-            text={<Bolder query={p.query} string={e.title} />} 
-            sendQuery={p.sendQuery}
+            order={highlighted}
+            highlighted={isHighlighted}
+            queryString={title}
+            text={<Bolder query={query} string={title} />} 
+            sendQuery={sendQuery}
         />
         
     });
-    let hide = (!p.focused || !p.autoList.length) ? "none" : ""
+    let hide = (!focused || !autoList.length) ? "none" : ""
 
     return <div className={style.suggestList} style={{display: hide}}>
         {list}
@@ -141,7 +147,7 @@ export default class SearchBar extends Component {
         /**/
 
     }
-    createAuto(val) {
+    createAuto() {
        
         if(this.state.text.length < 2) {
             this.setState({autoList:[]})
@@ -214,12 +220,24 @@ export default class SearchBar extends Component {
     
 
     render(p,s) {
+        const {
+            focused,
+            animating,
+            autoList,
+            text,
+            currentOrder,
+            savedText
+        } = s,
+        {
+            placeholdertext,
+            disabled
+        } = p
     
-        let placeholder = (s.focused) ? "" : (p.placeholdertext || "Search..."),
-            focusClass = (s.focused) ? style.focused : "",
-            animatingClass = (s.animating) ? style.animating : "",
-            autoList = s.autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase())),
-            openClass = (!s.focused || !autoList.length)? "" : style.listOpen; 
+        let placeholder = (focused) ? "" : (placeholdertext || "Search..."),
+            focusClass = (focused) ? style.focused : "",
+            animatingClass = (animating) ? style.animating : "",
+            autoListFiltered = autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase())),
+            openClass = (!s.focused || !autoListFiltered.length)? "" : style.listOpen; 
      
         
       
@@ -230,21 +248,21 @@ export default class SearchBar extends Component {
                 <div className={`${style.inputDrop} ${openClass} `}>
                     <input  
                         onKeyDown={(e) => {this.handleEnter(e)}} 
-                        disabled={p.disabled} 
+                        disabled={disabled} 
                         className={style.searchField}
                         placeholder={placeholder} 
                         onFocus={()  => this.toggleFocus(true, 1, -1)} 
                         onBlur={() => this.toggleFocus(false)}
-                        type="text" value={s.text}  
+                        type="text" value={text}  
                         onInput={(e) => {this.textInput(e)}}
                         ref={currentInput => this.currentInput = currentInput}
                     />
                     <AutoList 
-                        autoList={ autoList}
-                        highlighted={s.currentOrder}
-                        query={this.state.savedText}
+                        autoList={ autoListFiltered}
+                        highlighted={currentOrder}
+                        query={savedText}
                         sendQuery={this.sendNew}
-                        focused={s.focused}
+                        focused={focused}
                     />
                 </div>
                 <SearchButton searchClick={this.sendNew} listOpen={openClass} />

@@ -23,11 +23,11 @@ export default class App extends Component {
     }
     componentWillMount() {
         document.title = this.props.pagetitle || "Search";
-        const acceptResult = (results) => {
+        const acceptResult = ({items,error}) => {
             this.setState({
                 searching: false,
-                results: results.items || [],
-                error: results.error,
+                results: items || [],
+                error: error,
                 completedSearch: true
             })
         };
@@ -49,36 +49,36 @@ export default class App extends Component {
         )
 
     }
-    render(p,s) {
+    render({placeholdertext,searchpage,titlecolumn,site,list},{searching,query,results,completedSearch}) {
       
        
 
         return <div className={style.gSearchApp}>
-            <InputField autoUrl={this.state.queryurl} disabled={s.searching} query={s.query} placeholdertext={p.placeholdertext} searchpage={p.searchpage || null } titleColumn={this.props.titlecolumn}/>
-            {(s.searching) ? <LoaderBar /> : null}
-            {(!s.results.length && s.completedSearch) ? <div class={`${style.resultItem} ${style.resultDescription}`}>We couldn't find want you were looking for. <br/>Try a different search or <a href="http://sites.mercer.com/sites/glossary/default.aspx">browse the glossary</a>.</div> : null}
+            <InputField autoUrl={this.state.queryurl} disabled={searching} query={query} placeholdertext={placeholdertext} searchpage={searchpage || null } titleColumn={titlecolumn}/>
+            {(searching) ? <LoaderBar /> : null}
+            {(!results.length && completedSearch) ? <div class={`${style.resultItem} ${style.resultDescription}`}>We couldn't find want you were looking for. <br/>Try a different search or <a href="http://sites.mercer.com/sites/glossary/default.aspx">browse the glossary</a>.</div> : null}
             <ResultList
-                items={s.results}
-                site={p.site}
-                list={p.list}
+                items={results}
+                site={site}
+                list={list}
              />
         </div>
     }
 }
 
-const ResultList = (p) => {
+const ResultList = ({items,list,site}) => {
     
-    if(!p.items.length) {
+    if(!items.length) {
         return null; 
     }
 
     
-    const listItems = p.items.slice(0,50).map(e => (
-         <div key={e.ID} class={style.resultItem}>
-            <a class={style.resultTitle} target="_blank" href={`${p.site}/Lists/${p.list}/DispForm.aspx?ID=${e.ID}`}>
-                {e.Title}
+    const listItems = items.slice(0,50).map(({ID, OriginalDescription, Title}) => (
+         <div key={ID} class={style.resultItem}>
+            <a class={style.resultTitle} target="_blank" href={`${site}/Lists/${list}/DispForm.aspx?ID=${ID}`}>
+                {Title}
             </a>
-            <div class={style.resultDescription}  dangerouslySetInnerHTML={{ __html: HTMLClean(e.Description)  || HTMLClean(e.OriginalDescription) ||  "" }}>
+            <div class={style.resultDescription}  dangerouslySetInnerHTML={{ __html: HTMLClean(e.Description)  || HTMLClean(OriginalDescription) ||  "" }}>
                 
             </div>
            

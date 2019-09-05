@@ -4,17 +4,21 @@ import CAMLsender from "../util/CAMLsender";
 
 
 export default function(searchSchema, callback) {
+    const {
+        titleColumn,
+        otherColumns,
+        query,
+        url
+    } = searchSchema
 
-    let title = searchSchema.titleColumn; 
+  
     
-    let searchColumns = (searchSchema.otherColumns ) ? searchSchema.otherColumns.map(e => e.trim()) : [];
-        if(!searchColumns.includes(title)) {
-            searchColumns.push(title);
+    let searchColumns = (otherColumns ) ? otherColumns.map(e => e.trim()) : [];
+        if(!searchColumns.includes(titleColumn)) {
+            searchColumns.push(titleColumn);
         }
     searchColumns = searchColumns.filter((item,index,self) => self.indexOf(item) === index);
-    var queryArray = searchSchema.query.trim().split(" ").filter(function(e,i){
-        return e.length > 2; 
-    });
+    var queryArray = query.trim().split(" ").filter(e  => e.length > 2 );
 
     let CAMLQuery = queryBuilder(queryArray, searchColumns);
 
@@ -26,13 +30,13 @@ export default function(searchSchema, callback) {
         let results = returnPackage.data.d.results; 
       
         callback({
-        items: ranker(searchSchema.query, queryArray, results, searchColumns.filter(e => e !== title),title),
+        items: ranker(query, queryArray, results, searchColumns.filter(e => e !== titleColumn),titleColumn),
         error: false
         })
     }
     CAMLsender({
         type: "POST",
-        url: searchSchema.url,
+        url: url,
         callback: returnFunction,
         CAML: `<View><Query><Where>${CAMLQuery}</Where> </Query></View>`
     })
