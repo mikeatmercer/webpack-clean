@@ -22,13 +22,13 @@
     display: flex;
     justify-content: flex-end;
     
-    &.focused {
+    .clFocused {
         box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 12px 0 rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,.12);
     }
-    &.animating {
+    .clAnimating {
         transition: box-shadow .25s;
     }
-    &.listOpen {
+    .clListOpen {
         box-shadow: none; 
     }
     
@@ -40,7 +40,7 @@
     left: 0;
     top: 0;
     border-radius: 2px 0 0 2px;
-    &.listOpen {
+    .clListOpen {
         box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 12px 0 rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,.12);
         border-radius: 2px 0 2px 2px;
     }
@@ -58,7 +58,7 @@
     height: 42px; 
     border-radius: 0 2px 2px 0;
     cursor: pointer; 
-    &.listOpen {
+    .clListOpen {
         box-shadow: 0 0 4px 0 rgba(0,0,0,0.02), 0 1px 4px 0 rgba(0,0,0,0.1), 0 0 6px 0 rgba(0,0,0,0.06);
     }
     &.searchSubmit {
@@ -84,7 +84,7 @@ input.searchField, .searchField {
     outline: none; 
     width: 100%;
     display: block;
-    &.auto {
+    &.clAuto {
         background: black; 
     }
     &:-ms-input-placeholder {
@@ -106,7 +106,7 @@ input.searchField, .searchField {
         text-overflow: ellipsis;
         white-space: nowrap;
         cursor: pointer;
-        &.highlighted, &:hover {
+        &.clHighlighted, &:hover {
             background: #E0F1F4;
             
         }

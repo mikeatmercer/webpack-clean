@@ -2,13 +2,28 @@ import { Component } from "preact";
 import style from "./style.scss";
 import CAMLsender from "../util/CAMLsender"
 
+const {
+    searchButton,
+    searchSubmit,
+    suggestListItem,
+    clHighlighted,
+    suggestList,
+    barWrap,
+    spacer,
+    clFocused,
+    clAnimating,
+    clListOpen,
+    searchInput,
+    inputDrop
+} = style
+
 function SearchButton(p) {
     function searchClick(e) {
         e.preventDefault(); 
         p.searchClick();
     }
 
-    return <button className={`${style.searchButton} ${style.searchSubmit} ${p.listOpen}`} onClick={searchClick}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
+    return <button className={`${searchButton} ${searchSubmit} ${p.listOpen}`} onClick={searchClick}><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></button>
 }
 
 const Bolder = ({string,query}) => {
@@ -21,41 +36,35 @@ const Bolder = ({string,query}) => {
         return <span>{sec1}<strong>{sec2}</strong>{sec3}</span>
 }
 
-const AutoListItem = ({sendQuery,highlighted}) => {
+const AutoListItem = (p) => {
     function sender(e) {
         e.preventDefault();
         
-        sendQuery(p.queryString)
+        p.sendQuery(p.queryString)
     }
    
 
-    return <div className={`${style.suggestListItem} ${highlighted}`}  onClick={sender}>
+    return <div className={`${suggestListItem} ${p.highlighted}`}  onClick={sender}>
         {p.text}
     </div>
 }
 const AutoList = (p) => {
-    const {
-        autoList,
-        highlighted,
-        query,
-        sendQuery,
-        focused
-    } = p
     
-    let list = autoList.map(({title},i) => {
-        let isHighlighted = (i == highlighted) ? style.highlighted : ""
+    
+    let list = p.autoList.map((e,i) => {
+        let highlighted = (i == p.highlighted) ? clHighlighted : ""
         return <AutoListItem 
-            order={highlighted}
-            highlighted={isHighlighted}
-            queryString={title}
-            text={<Bolder query={query} string={title} />} 
-            sendQuery={sendQuery}
+            order={p.highlighted}
+            highlighted={highlighted}
+            queryString={e.title}
+            text={<Bolder query={p.query} string={e.title} />} 
+            sendQuery={p.sendQuery}
         />
         
     });
-    let hide = (!focused || !autoList.length) ? "none" : ""
+    let hide = (!p.focused || !p.autoList.length) ? "none" : ""
 
-    return <div className={style.suggestList} style={{display: hide}}>
+    return <div className={suggestList} style={{display: hide}}>
         {list}
         
     </div>
@@ -147,7 +156,7 @@ export default class SearchBar extends Component {
         /**/
 
     }
-    createAuto() {
+    createAuto(val) {
        
         if(this.state.text.length < 2) {
             this.setState({autoList:[]})
@@ -220,49 +229,37 @@ export default class SearchBar extends Component {
     
 
     render(p,s) {
-        const {
-            focused,
-            animating,
-            autoList,
-            text,
-            currentOrder,
-            savedText
-        } = s,
-        {
-            placeholdertext,
-            disabled
-        } = p
     
-        let placeholder = (focused) ? "" : (placeholdertext || "Search..."),
-            focusClass = (focused) ? style.focused : "",
-            animatingClass = (animating) ? style.animating : "",
-            autoListFiltered = autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase())),
-            openClass = (!s.focused || !autoListFiltered.length)? "" : style.listOpen; 
+        let placeholder = (s.focused) ? "" : (p.placeholdertext || "Search..."),
+            focusClass = (s.focused) ? clFocused : "",
+            animatingClass = (s.animating) ? clAnimating : "",
+            autoList = s.autoList.filter(e => e.title.toLowerCase().includes(this.state.savedText.toLowerCase())),
+            openClass = (!s.focused || !autoList.length)? "" : clListOpen; 
      
         
       
         return (
-            <div className={style.barWrap}>
-            <div className={style.spacer} />
-            <div className={`${style.searchInput} ${animatingClass} ${focusClass} ${openClass}`}>
-                <div className={`${style.inputDrop} ${openClass} `}>
+            <div className={barWrap}>
+            <div className={spacer} />
+            <div className={`${searchInput} ${animatingClass} ${focusClass} ${openClass}`}>
+                <div className={`${inputDrop} ${openClass} `}>
                     <input  
                         onKeyDown={(e) => {this.handleEnter(e)}} 
-                        disabled={disabled} 
+                        disabled={p.disabled} 
                         className={style.searchField}
                         placeholder={placeholder} 
                         onFocus={()  => this.toggleFocus(true, 1, -1)} 
                         onBlur={() => this.toggleFocus(false)}
-                        type="text" value={text}  
+                        type="text" value={s.text}  
                         onInput={(e) => {this.textInput(e)}}
                         ref={currentInput => this.currentInput = currentInput}
                     />
                     <AutoList 
-                        autoList={ autoListFiltered}
-                        highlighted={currentOrder}
-                        query={savedText}
+                        autoList={ autoList}
+                        highlighted={s.currentOrder}
+                        query={this.state.savedText}
                         sendQuery={this.sendNew}
-                        focused={focused}
+                        focused={s.focused}
                     />
                 </div>
                 <SearchButton searchClick={this.sendNew} listOpen={openClass} />

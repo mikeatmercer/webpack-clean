@@ -6,6 +6,13 @@ import LoaderBar from "./LoaderBar";
 import searchApp from "./searchApp";
 import HTMLClean from "./util/HTMLclean";
 
+const {
+    resultDescription,
+    resultItem,
+    gSearchApp,
+    searchResults,
+    resultTitle
+} = style
 
 export default class App extends Component {
     constructor(props) {
@@ -53,10 +60,10 @@ export default class App extends Component {
       
        
 
-        return <div className={style.gSearchApp}>
+        return <div className={gSearchApp}>
             <InputField autoUrl={this.state.queryurl} disabled={searching} query={query} placeholdertext={placeholdertext} searchpage={searchpage || null } titleColumn={titlecolumn}/>
             {(searching) ? <LoaderBar /> : null}
-            {(!results.length && completedSearch) ? <div class={`${style.resultItem} ${style.resultDescription}`}>We couldn't find want you were looking for. <br/>Try a different search or <a href="http://sites.mercer.com/sites/glossary/default.aspx">browse the glossary</a>.</div> : null}
+            {(!results.length && completedSearch) ? <div class={`${resultItem} ${resultDescription}`}>We couldn't find want you were looking for. <br/>Try a different search or <a href="http://sites.mercer.com/sites/glossary/default.aspx">browse the glossary</a>.</div> : null}
             <ResultList
                 items={results}
                 site={site}
@@ -71,18 +78,19 @@ const ResultList = ({items,list,site}) => {
     if(!items.length) {
         return null; 
     }
+    
 
     
     const listItems = items.slice(0,50).map(({ID, OriginalDescription, Title}) => (
-         <div key={ID} class={style.resultItem}>
-            <a class={style.resultTitle} target="_blank" href={`${site}/Lists/${list}/DispForm.aspx?ID=${ID}`}>
+         <div key={ID} class={resultItem}>
+            <a class={resultTitle} target="_blank" href={`${site}/Lists/${list}/DispForm.aspx?ID=${ID}`}>
                 {Title}
             </a>
-            <div class={style.resultDescription}  dangerouslySetInnerHTML={{ __html: HTMLClean(e.Description)  || HTMLClean(OriginalDescription) ||  "" }}>
+            <div class={resultDescription}  dangerouslySetInnerHTML={{ __html: HTMLClean(e.Description)  || HTMLClean(OriginalDescription) ||  "" }}>
                 
             </div>
            
         </div>
      ) );
-    return <div class={style.searchResults}>{listItems}</div>
+    return <div class={searchResults}>{listItems}</div>
 }
